@@ -1,0 +1,6 @@
+data
+output/burst_by_route*.csv
+__pycache__/
+.venv/
+*.pyc
+.DS_Store
