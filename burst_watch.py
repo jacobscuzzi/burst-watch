@@ -113,7 +113,7 @@ def pick_story_players(df):
     q = df[df.questionable & ~df.pre_out]
     if len(q):
         picks["questionable but full burst"] = q.sort_values("burst_idx_a").iloc[-1].nflId
-    un = df[df.clean & (df.week > 1)]
+    un = df[df.clean & (df.week > 1) & df.position.isin(["WR", "TE"])]
     if len(un):
         picks["never listed, burst gone"] = un.sort_values("burst_idx_a").iloc[0].nflId
     return picks
@@ -129,9 +129,10 @@ def chart_story_players(df, picks):
                    zorder=2, label="listed questionable")
         ax.scatter(p.week[p.pre_out], p.burst_idx_a[p.pre_out], s=70, color=C_OUT, marker="s",
                    zorder=3, label="ruled out next week")
-        for _, r in p[p.listed].iterrows():
-            if isinstance(r.report_primary_injury, str):
-                ax.annotate(r.report_primary_injury, (r.week, r.burst_idx_a), (0, 8),
+        for _, r in p[p.listed | p.pre_out].iterrows():
+            txt = r.report_primary_injury if isinstance(r.report_primary_injury, str) else r.next_week_out_injury
+            if isinstance(txt, str):
+                ax.annotate(txt, (r.week, r.burst_idx_a), (0, 8),
                             textcoords="offset points", ha="center", fontsize=8)
         ax.axhline(0, color="grey", lw=0.8, ls="--")
         ax.set_title(f"{p.displayName.iloc[0]} ({p.position.iloc[0]})\n{label}", fontsize=10)
